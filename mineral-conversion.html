@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MINERAL CONVERSION</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 480px; margin: 30px auto; padding: 20px; background: #f0f0f0; }
+  label, select, input, button { display: block; margin: 10px 0; width: 100%; font-size: 1.1em; }
+  input, select { padding: 8px; }
+  button {
+    padding: 15px;
+    font-size: 1.4em;
+    font-weight: bold;
+    cursor: pointer;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    transition: background-color 0.3s ease;
+  }
+  button:hover {
+    background: #45a049;
+  }
+  #result {
+    margin-top: 25px;
+    font-weight: bold;
+    font-size: 1.3em;
+    color: #222;
+  }
+</style>
+</head>
+<body>
+
+<h2>MINERAL CONVERSION</h2>
+
+<label for="fromOre">Chọn quặng gốc (A):</label>
+<select id="fromOre"></select>
+
+<label for="toOre">Chọn quặng cần đổi (B):</label>
+<select id="toOre"></select>
+
+<label for="amount">Số lượng quặng A:</label>
+<input type="number" id="amount" min="1" value="1" />
+
+<button onclick="convert()">Quy đổi</button>
+
+<div id="result"></div>
+
+<script>
+  const oreValues = {
+    coal: 1,
+    copper: 1.25,
+    iron: 4,
+    redstone: 5,
+    lapis: 6,
+    gold: 8,
+    diamond: 16,
+    emerald: 24,
+    ancient_debris: 48
+  };
+
+  const oreNames = {
+    coal: "Coal (Than đá)",
+    copper: "Copper Ingot (Đồng thỏi)",
+    iron: "Iron Ingot (Sắt thỏi)",
+    redstone: "Redstone (Đá đỏ)",
+    lapis: "Lapis Lazuli (Đá Lapis)",
+    gold: "Gold Ingot (Vàng thỏi)",
+    diamond: "Diamond (Kim cương)",
+    emerald: "Emerald (Ngọc lục bảo)",
+    ancient_debris: "Ancient Debris (Mảnh cổ đại)"
+  };
+
+  const fromOre = document.getElementById("fromOre");
+  const toOre = document.getElementById("toOre");
+
+  for (const key in oreNames) {
+    let optionA = document.createElement("option");
+    optionA.value = key;
+    optionA.textContent = oreNames[key];
+    fromOre.appendChild(optionA);
+
+    let optionB = document.createElement("option");
+    optionB.value = key;
+    optionB.textContent = oreNames[key];
+    toOre.appendChild(optionB);
+  }
+
+  toOre.value = "iron";
+
+  function convert() {
+    const fromKey = fromOre.value;
+    const toKey = toOre.value;
+    const amount = Number(document.getElementById("amount").value);
+
+    if (amount <= 0 || isNaN(amount)) {
+      alert("Vui lòng nhập số lượng hợp lệ!");
+      return;
+    }
+
+    if (fromKey === toKey) {
+      document.getElementById("result").textContent =
+        `Bạn chọn cùng loại quặng, số lượng giữ nguyên: ${amount} ${oreNames[fromKey]}`;
+      return;
+    }
+
+    const fromValue = oreValues[fromKey];
+    const toValue = oreValues[toKey];
+
+    const resultAmount = amount * (fromValue / toValue);
+    const rounded = Math.round(resultAmount);
+
+    document.getElementById("result").textContent =
+      `${amount} ${oreNames[fromKey]} ≈ ${rounded} ${oreNames[toKey]}`;
+  }
+</script>
+
+</body>
+</html>
