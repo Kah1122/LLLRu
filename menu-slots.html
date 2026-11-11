@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Slot Picker - MC</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #121212;
+      color: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: #1e1e1e;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+      width: 100%;
+      max-width: 650px;
+      border: 1px solid #333;
+    }
+
+    h1 {
+      font-size: 32px;
+      margin-bottom: 12px;
+      color: #6666FF;
+      text-align: center;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .description {
+      font-size: 16px;
+      margin-bottom: 30px;
+      color: #bbb;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(9, 50px);
+      grid-gap: 8px;
+      margin-bottom: 30px;
+      justify-content: center;
+    }
+
+    .slot {
+      width: 50px;
+      height: 50px;
+      background: #2a2a2a;
+      border: 2px solid #3a3a3a;
+      border-radius: 8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      font-size: 15px;
+      color: #ddd;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .slot:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 12px rgba(0, 255, 204, 0.5);
+      border-color: #6666FF;
+      z-index: 10;
+    }
+
+    .slot.selected {
+      background-color: #6666FF;
+      color: #111;
+      border-color: #0000FF;
+      box-shadow: 0 0 12px rgba(0, 255, 204, 0.7);
+    }
+
+    .slot.red {
+      background-color: #ff3a3a;
+      color: white;
+      border-color: #ff6e6e;
+      box-shadow: 0 0 12px rgba(255, 58, 58, 0.5);
+    }
+
+    .slot.blue {
+      background-color: #3a7dff;
+      color: white;
+      border-color: #6a9eff;
+      box-shadow: 0 0 12px rgba(58, 125, 255, 0.5);
+    }
+
+    .slot.green {
+      background-color: #3aff6f;
+      color: #111;
+      border-color: #6fff95;
+      box-shadow: 0 0 12px rgba(58, 255, 111, 0.5);
+    }
+
+    .slot.yellow {
+      background-color: #ffeb3a;
+      color: #111;
+      border-color: #fff06e;
+      box-shadow: 0 0 12px rgba(255, 235, 58, 0.5);
+    }
+
+    .slot.purple {
+      background-color: #a13aff;
+      color: white;
+      border-color: #c06eff;
+      box-shadow: 0 0 12px rgba(161, 58, 255, 0.5);
+    }
+
+    .slot.orange {
+      background-color: #ff9a3a;
+      color: #111;
+      border-color: #ffb76e;
+      box-shadow: 0 0 12px rgba(255, 154, 58, 0.5);
+    }
+
+    .slot.pink {
+      background-color: #ff3aab;
+      color: white;
+      border-color: #ff6ec0;
+      box-shadow: 0 0 12px rgba(255, 58, 171, 0.5);
+    }
+
+    .action-controls {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 25px;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      padding: 12px 20px;
+      border-radius: 8px;
+      background: #333;
+      color: white;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .action-btn:hover {
+      background: #444;
+      transform: translateY(-2px);
+    }
+
+    .output-section {
+      margin-top: 20px;
+      width: 100%;
+      background: #262626;
+      border-radius: 10px;
+      padding: 20px;
+      max-height: 250px;
+      overflow-y: auto;
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .color-output {
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      background: rgba(0, 0, 0, 0.2);
+      font-size: 15px;
+    }
+
+    .color-title {
+      font-weight: bold;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .copy-btn {
+      background: #444;
+      color: white;
+      padding: 6px 12px;
+      font-size: 13px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: #555;
+      transform: translateY(-2px);
+    }
+
+    .no-selection {
+      color: #777;
+      font-style: italic;
+      text-align: center;
+      padding: 15px;
+      font-size: 15px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      color: #6666FF;
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #333;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #1a1a1a;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #444;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+
+    .tooltip {
+      position: fixed;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 13px;
+      pointer-events: none;
+      z-index: 1000;
+      transition: opacity 0.2s;
+    }
+
+    /* Phần import slots */
+    .control-section {
+      margin-bottom: 25px;
+      background: #262626;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .section-header {
+      font-size: 16px;
+      color: #6666FF;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .section-header span {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .control-form {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .control-input {
+      flex: 1;
+      padding: 10px 15px;
+      border-radius: 8px;
+      background: #333;
+      border: 1px solid #444;
+      color: white;
+      font-size: 15px;
+      min-width: 120px;
+    }
+
+    .control-input:focus {
+      outline: none;
+      border-color: #6666FF;
+      box-shadow: 0 0 8px rgba(0, 230, 184, 0.4);
+    }
+
+    .control-btn {
+      padding: 10px 20px;
+      background: #6666FF;
+      color: #111;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .control-btn:hover {
+      background: #0000FF;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .color-select {
+      padding: 10px 15px;
+      background: #333;
+      border: 1px solid #444;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    .color-select:focus {
+      outline: none;
+      border-color: #6666FF;
+    }
+
+    .action-controls-small {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 8px;
+    }
+
+    .small-btn {
+      padding: 6px 12px;
+      border-radius: 6px;
+      background: #333;
+      color: white;
+      border: none;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .small-btn:hover {
+      background: #444;
+    }
+
+    .color-indicator {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧩 Slot Picker - DeluxeMenus</h1>
+    <div class="description">Click vào các ô để chọn slot bạn muốn sử dụng trong config DeluxeMenus</div>
+
+    <!-- Phần chọn màu -->
+    <div class="control-section">
+      <div class="section-header">
+        <span>🎨 Chọn màu</span>
+      </div>
+      <div class="control-form">
+        <select id="activeColorSelect" class="color-select">
+          <option value="">Mặc định</option>
+          <option value="red">Đỏ</option>
+          <option value="blue">Xanh dương</option>
+          <option value="green">Xanh lá</option>
+          <option value="yellow">Vàng</option>
+          <option value="purple">Tím</option>
+          <option value="orange">Cam</option>
+          <option value="pink">Hồng</option>
+        </select>
+        <button class="action-btn" id="clearSelectedColor">
+          <span>🧹</span> Xóa tất cả slot màu đang chọn
+        </button>
+        <button class="action-btn" id="clearAllSlots">
+          <span>🗑️</span> Xóa tất cả slot
+        </button>
+      </div>
+    </div>
+
+    <!-- Phần import slots -->
+    <div class="control-section">
+      <div class="section-header">
+        <span>📥 Nhập dãy slots</span>
+      </div>
+      <div class="control-form">
+        <input type="text" id="importInput" class="control-input" placeholder="Nhập dãy số (VD: 0, 1, 2, 3, 10-15)">
+        <select id="importColorSelect" class="color-select">
+          <option value="selected">Mặc định</option>
+          <option value="red">Đỏ</option>
+          <option value="blue">Xanh dương</option>
+          <option value="green">Xanh lá</option>
+          <option value="yellow">Vàng</option>
+          <option value="purple">Tím</option>
+          <option value="orange">Cam</option>
+          <option value="pink">Hồng</option>
+        </select>
+        <button class="control-btn" id="importBtn">Nhập</button>
+      </div>
+    </div>
+
+    <div class="grid" id="slotGrid"></div>
+
+    <div class="section-title">Kết quả:</div>
+    <div class="output-section" id="colorOutputs">
+      <div class="no-selection">Chưa có slot nào được chọn</div>
+    </div>
+  </div>
+
+  <script>
+    const grid = document.getElementById("slotGrid");
+    const colorOutputs = document.getElementById("colorOutputs");
+    const importInput = document.getElementById("importInput");
+    const importBtn = document.getElementById("importBtn");
+    const importColorSelect = document.getElementById("importColorSelect");
+    const activeColorSelect = document.getElementById("activeColorSelect");
+    const selectedSlots = new Set();
+    let currentColor = '';
+    
+    const colorSlots = {
+      red: new Set(),
+      blue: new Set(),
+      green: new Set(),
+      yellow: new Set(),
+      purple: new Set(),
+      orange: new Set(),
+      pink: new Set()
+    };
+
+    // Tạo grid slot
+    for (let i = 0; i < 54; i++) {
+      const slot = document.createElement("div");
+      slot.className = "slot";
+      slot.textContent = i;
+      slot.dataset.index = i;
+      slot.dataset.color = '';
+      
+      slot.onclick = (e) => {
+        const slotIndex = parseInt(slot.dataset.index);
+        const currentSlotColor = slot.dataset.color;
+        
+        // Xóa slot khỏi tất cả các set
+        removeSlotFromAllSets(slotIndex);
+        
+        // Xóa tất cả class màu
+        slot.classList.remove("red", "blue", "green", "yellow", "purple", "orange", "pink", "selected");
+        
+        // Nếu click vào slot có cùng màu đang chọn, thì chỉ xóa nó
+        if (currentColor && currentSlotColor === currentColor) {
+          slot.dataset.color = '';
+        } 
+        // Ngược lại, thì thêm màu mới
+        else if (currentColor) {
+          colorSlots[currentColor].add(slotIndex);
+          slot.classList.add(currentColor);
+          slot.dataset.color = currentColor;
+        } 
+        // Chế độ mặc định
+        else {
+          if (currentSlotColor === 'selected') {
+            // Đã chọn trước đó, bỏ chọn
+            slot.dataset.color = '';
+          } else {
+            // Chưa chọn, thêm vào
+            selectedSlots.add(slotIndex);
+            slot.classList.add("selected");
+            slot.dataset.color = 'selected';
+          }
+        }
+        
+        updateColorOutputs();
+        e.stopPropagation();
+      };
+      
+      // Thêm tooltip hiển thị số slot khi hover
+      slot.addEventListener('mouseenter', (e) => {
+        const tooltip = document.createElement('div');
+        tooltip.className = 'tooltip';
+        tooltip.textContent = `Slot: ${i}`;
+        tooltip.style.left = `${e.clientX + 10}px`;
+        tooltip.style.top = `${e.clientY + 10}px`;
+        document.body.appendChild(tooltip);
+        slot.dataset.tooltip = true;
+      });
+      
+      slot.addEventListener('mousemove', (e) => {
+        const tooltip = document.querySelector('.tooltip');
+        if (tooltip) {
+          tooltip.style.left = `${e.clientX + 10}px`;
+          tooltip.style.top = `${e.clientY + 10}px`;
+        }
+      });
+      
+      slot.addEventListener('mouseleave', () => {
+        const tooltip = document.querySelector('.tooltip');
+        if (tooltip) {
+          document.body.removeChild(tooltip);
+        }
+        delete slot.dataset.tooltip;
+      });
+      
+      grid.appendChild(slot);
+    }
+
+    // Xóa slot khỏi tất cả các set
+    function removeSlotFromAllSets(slotIndex) {
+      selectedSlots.delete(slotIndex);
+      for (const color in colorSlots) {
+        colorSlots[color].delete(slotIndex);
+      }
+    }
+
+    // Cập nhật màu đang chọn từ select
+    activeColorSelect.addEventListener('change', function() {
+      setColor(this.value);
+    });
+
+    function setColor(color) {
+      currentColor = color;
+      // Cập nhật select
+      activeColorSelect.value = color;
+    }
+
+    // Xóa tất cả slot có màu đang chọn
+    document.getElementById('clearSelectedColor').addEventListener('click', () => {
+      const selectedColor = activeColorSelect.value;
+      
+      // Nếu là màu mặc định
+      if (selectedColor === '') {
+        const slotsToRemove = Array.from(selectedSlots);
+        
+        // Xóa class màu khỏi các slot trên giao diện
+        slotsToRemove.forEach(slotIndex => {
+          const slotElement = document.querySelector(`.slot[data-index="${slotIndex}"]`);
+          if (slotElement) {
+            slotElement.classList.remove("selected");
+            slotElement.dataset.color = '';
+          }
+        });
+        
+        // Xóa khỏi set
+        selectedSlots.clear();
+        
+        showNotification(`Đã xóa tất cả slot màu mặc định!`, "#6666FF");
+      }
+      // Nếu là màu khác
+      else if (selectedColor in colorSlots) {
+        const slotsToRemove = Array.from(colorSlots[selectedColor]);
+        
+        // Xóa class màu khỏi các slot trên giao diện
+        slotsToRemove.forEach(slotIndex => {
+          const slotElement = document.querySelector(`.slot[data-index="${slotIndex}"]`);
+          if (slotElement) {
+            slotElement.classList.remove(selectedColor);
+            slotElement.dataset.color = '';
+          }
+        });
+        
+        // Xóa khỏi set
+        colorSlots[selectedColor].clear();
+        
+        showNotification(`Đã xóa tất cả slot màu ${getColorName(selectedColor)}!`, getColorHex(selectedColor));
+      }
+      
+      updateColorOutputs();
+    });
+    
+    // Xóa tất cả slot
+    document.getElementById('clearAllSlots').addEventListener('click', () => {
+      // Xóa tất cả slot
+      selectedSlots.clear();
+      
+      for (const color in colorSlots) {
+        colorSlots[color].clear();
+      }
+      
+      // Xóa class màu khỏi tất cả slot trên giao diện
+      document.querySelectorAll('.slot').forEach(slot => {
+        slot.classList.remove("red", "blue", "green", "yellow", "purple", "orange", "pink", "selected");
+        slot.dataset.color = '';
+      });
+      
+      showNotification("Đã xóa tất cả slot!", "#6666FF");
+      updateColorOutputs();
+    });
+
+    function updateColorOutputs() {
+      colorOutputs.innerHTML = '';
+      
+      let hasContent = false;
+      
+      // Hiển thị các slot mặc định trước
+      if (selectedSlots.size > 0) {
+        hasContent = true;
+        const sortedSlots = Array.from(selectedSlots).sort((a, b) => a - b);
+        const defaultOutput = document.createElement("div");
+        defaultOutput.className = "color-output";
+        defaultOutput.style.borderLeft = '4px solid #6666FF';
+        
+        defaultOutput.innerHTML = `
+          <div class="color-title">
+            <span><span class="color-indicator" style="background-color: #6666FF"></span>Mặc định (${selectedSlots.size} slot)</span>
+            <button class="copy-btn" onclick="copySlots(${JSON.stringify(Array.from(selectedSlots))})">Copy</button>
+          </div>
+          <div>${sortedSlots.join(", ")}</div>
+        `;
+        
+        colorOutputs.appendChild(defaultOutput);
+      }
+      
+      // Hiển thị các slot theo màu
+      for (const [color, slots] of Object.entries(colorSlots)) {
+        if (slots.size > 0) {
+          hasContent = true;
+          const sortedSlots = Array.from(slots).sort((a, b) => a - b);
+          const colorOutput = document.createElement("div");
+          colorOutput.className = "color-output";
+          
+          let borderColor = getColorHex(color);
+          let textColor = (color === 'green' || color === 'yellow' || color === 'orange') ? '#111' : '#fff';
+          
+          colorOutput.style.borderLeft = `4px solid ${borderColor}`;
+          
+          colorOutput.innerHTML = `
+            <div class="color-title" style="color: ${textColor === '#111' ? '#111' : '#fff'}">
+              <span><span class="color-indicator" style="background-color: ${borderColor}"></span>${getColorName(color)} (${slots.size} slot)</span>
+              <button class="copy-btn" onclick="copySlots(${JSON.stringify(Array.from(slots))})">Copy</button>
+            </div>
+            <div>${sortedSlots.join(", ")}</div>
+          `;
+          
+          colorOutputs.appendChild(colorOutput);
+        }
+      }
+      
+      if (!hasContent) {
+        colorOutputs.innerHTML = '<div class="no-selection">Chưa có slot nào được chọn</div>';
+      }
+      
+      // Đảm bảo hiển thị kết quả mới nhất
+      colorOutputs.scrollTop = colorOutputs.scrollHeight;
+    }
+
+    function getColorName(color) {
+      switch(color) {
+        case 'red': return 'Đỏ';
+        case 'blue': return 'Xanh dương';
+        case 'green': return 'Xanh lá';
+        case 'yellow': return 'Vàng';
+        case 'purple': return 'Tím';
+        case 'orange': return 'Cam';
+        case 'pink': return 'Hồng';
+        default: return 'Mặc định';
+      }
+    }
+    
+    function getColorHex(color) {
+      switch(color) {
+        case 'red': return '#ff3a3a';
+        case 'blue': return '#3a7dff';
+        case 'green': return '#3aff6f';
+        case 'yellow': return '#ffeb3a';
+        case 'purple': return '#a13aff';
+        case 'orange': return '#ff9a3a';
+        case 'pink': return '#ff3aab';
+        default: return '#6666FF';
+      }
+    }
+
+    function copySlots(slots) {
+      const tempInput = document.createElement("textarea");
+      tempInput.value = slots.sort((a, b) => a - b).join(", ");
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand("copy");
+      document.body.removeChild(tempInput);
+      
+      showNotification("Đã sao chép các slot vào clipboard!", "#6666FF");
+    }
+
+    function showNotification(message, bgColor = "#6666FF") {
+      const notification = document.createElement('div');
+      notification.style.position = 'fixed';
+      notification.style.bottom = '20px';
+      notification.style.right = '20px';
+      notification.style.backgroundColor = bgColor;
+      notification.style.color = bgColor === "#ffeb3a" || bgColor === "#3aff6f" || bgColor === "#ff9a3a" ? '#111' : '#fff';
+      notification.style.padding = '12px 24px';
+      notification.style.borderRadius = '8px';
+      notification.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+      notification.style.zIndex = '1000';
+      notification.style.fontWeight = 'bold';
+      notification.textContent = message;
+      notification.style.opacity = '0';
+      notification.style.transform = 'translateY(20px)';
+      notification.style.transition = 'opacity 0.3s, transform 0.3s';
+      
+      document.body.appendChild(notification);
+      
+      // Hiệu ứng hiện dần
+      setTimeout(() => {
+        notification.style.opacity = '1';
+        notification.style.transform = 'translateY(0)';
+      }, 10);
+      
+      setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+          if (notification.parentNode) {
+            document.body.removeChild(notification);
+          }
+        }, 300);
+      }, 2500);
+    }
+
+    // Chức năng nhập dãy số
+    function parseSlotRange(input) {
+      if (!input || input.trim() === '') return [];
+      
+      const slots = new Set();
+      const parts = input.split(',');
+      
+      for (let part of parts) {
+        part = part.trim();
+        
+        if (part.includes('-')) {
+          // Xử lý range
+          const [start, end] = part.split('-').map(n => parseInt(n.trim()));
+          
+          if (!isNaN(start) && !isNaN(end)) {
+            for (let i = start; i <= end; i++) {
+              if (i >= 0 && i < 54) slots.add(i);
+            }
+          }
+        } else {
+          // Xử lý số đơn
+          const num = parseInt(part);
+          if (!isNaN(num) && num >= 0 && num < 54) {
+            slots.add(num);
+          }
+        }
+      }
+      
+      return Array.from(slots);
+    }
+
+    // Xử lý nhập dãy số
+    importBtn.addEventListener('click', () => {
+      const input = importInput.value;
+      const selectedColor = importColorSelect.value;
+      const slots = parseSlotRange(input);
+      
+      if (slots.length === 0) {
+        showNotification("Không có slot hợp lệ để nhập!", "#ff5555");
+        return;
+      }
+      
+      // Thêm các slot vào lưới với màu đã chọn
+      slots.forEach(slotIndex => {
+        const slotElement = document.querySelector(`.slot[data-index="${slotIndex}"]`);
+        
+        if (slotElement) {
+          // Xóa slot khỏi tất cả các set
+          removeSlotFromAllSets(slotIndex);
+          
+          // Xóa tất cả class màu
+          slotElement.classList.remove("red", "blue", "green", "yellow", "purple", "orange", "pink", "selected");
+          
+          // Thêm vào set và hiển thị màu tương ứng
+          if (selectedColor === "selected") {
+            selectedSlots.add(slotIndex);
+            slotElement.classList.add("selected");
+            slotElement.dataset.color = 'selected';
+          } else {
+            colorSlots[selectedColor].add(slotIndex);
+            slotElement.classList.add(selectedColor);
+            slotElement.dataset.color = selectedColor;
+          }
+        }
+      });
+      
+      // Hiển thị thành công và cập nhật kết quả
+      const colorName = selectedColor === "selected" ? "Mặc định" : getColorName(selectedColor);
+      showNotification(`Đã nhập ${slots.length} slot với màu ${colorName}!`, selectedColor === "selected" ? "#6666FF" : getColorHex(selectedColor));
+      
+      updateColorOutputs();
+      importInput.value = ''; // Xóa input sau khi nhập
+    });
+
+    // Hỗ trợ nhấn Enter để nhập
+    importInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        importBtn.click();
+      }
+    });
+  </script>
+</body>
+</html>
