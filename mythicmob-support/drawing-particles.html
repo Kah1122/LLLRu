@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MythicMobs Particle Builder</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:sans-serif;background:#000;color:#ccc;min-height:100vh;user-select:none}
+h1{font-size:13px;font-weight:500;padding:9px 14px;background:#0a0a0a;border-bottom:1px solid #1e1e1e;color:#666;letter-spacing:.08em;text-transform:uppercase}
+
+.toolbar{display:flex;flex-wrap:wrap;gap:7px;padding:7px 14px;background:#0a0a0a;border-bottom:1px solid #1e1e1e;align-items:center}
+.toolbar .field{display:flex;align-items:center;gap:5px}
+.toolbar label{font-size:11px;color:#555}
+.toolbar input[type=text],.toolbar input[type=number],.toolbar select{
+  background:#111;border:1px solid #252525;border-radius:4px;color:#ccc;font-size:11px;padding:3px 6px;outline:none}
+.toolbar input[type=text]{width:76px}
+.toolbar input[type=number]{width:50px}
+.toolbar select{width:128px}
+.color-preview{width:15px;height:15px;border-radius:3px;border:1px solid #333;flex-shrink:0}
+.sep{width:1px;height:18px;background:#222;margin:0 2px}
+button{font-size:11px;padding:4px 10px;border-radius:4px;cursor:pointer;border:1px solid #252525;background:#111;color:#aaa}
+button:hover{background:#181818;border-color:#444}
+button.primary{border-color:#444;color:#ddd}
+button.primary:hover{background:#181818;border-color:#666}
+button.danger{border-color:#3a1515;color:#774444}
+button.danger:hover{background:#140a0a}
+button.accent{border-color:#1a3a1a;color:#448844}
+button.accent:hover{background:#0a140a}
+
+.settings-bar{display:flex;flex-wrap:wrap;gap:7px;padding:5px 14px;background:#050505;border-bottom:1px solid #1a1a1a;align-items:center}
+.settings-bar label{font-size:11px;color:#555}
+.settings-bar select{background:#111;border:1px solid #252525;border-radius:4px;color:#ccc;font-size:11px;padding:3px 6px;outline:none}
+.settings-bar .hint{font-size:10px;color:#2e2e2e;margin-left:4px}
+
+/* ── View toggle bar ── */
+.view-toggle-bar{display:flex;flex-wrap:wrap;gap:5px;padding:6px 14px;background:#060606;border-bottom:1px solid #1a1a1a;align-items:center}
+.view-toggle-bar .vt-label{font-size:11px;color:#444;margin-right:2px}
+.vtbtn{font-size:11px;padding:3px 10px;border-radius:4px;cursor:pointer;border:1px solid #252525;background:#0d0d0d;color:#444;transition:all .12s}
+.vtbtn:hover{border-color:#383838;color:#777}
+.vtbtn.on{color:#ddd;border-color:#3a3a3a;background:#161616}
+.vtbtn.on[data-vid=front]  {border-color:#3a7ab8;color:#3a7ab8}
+.vtbtn.on[data-vid=behind] {border-color:#7755aa;color:#7755aa}
+.vtbtn.on[data-vid=right]  {border-color:#aa5522;color:#aa5522}
+.vtbtn.on[data-vid=left]   {border-color:#aa3366;color:#aa3366}
+.vtbtn.on[data-vid=top]    {border-color:#337755;color:#337755}
+.vtbtn.on[data-vid=bottom] {border-color:#886622;color:#886622}
+.vt-sep{width:1px;height:18px;background:#1e1e1e;margin:0 2px}
+.vtbtn-all{font-size:10px;padding:2px 8px;border-radius:4px;cursor:pointer;border:1px solid #222;background:#0d0d0d;color:#3a3a3a}
+.vtbtn-all:hover{border-color:#333;color:#666}
+
+.views-container{display:grid;gap:1px;background:#111}
+.views-container.cols-1{grid-template-columns:1fr}
+.views-container.cols-2{grid-template-columns:repeat(2,1fr)}
+.views-container.cols-3{grid-template-columns:repeat(3,1fr)}
+.views-container.cols-4{grid-template-columns:repeat(2,1fr)}
+.views-container.cols-5{grid-template-columns:repeat(3,1fr)}
+.views-container.cols-6{grid-template-columns:repeat(3,1fr)}
+.view-panel{background:#000;padding:9px;display:flex;flex-direction:column;align-items:center}
+.view-title{font-size:11px;font-weight:500;margin-bottom:5px;text-align:center;letter-spacing:.04em}
+
+.grid-area{display:flex;flex-direction:column;align-items:flex-start}
+.x-labels-row{display:flex;gap:0;margin-bottom:2px}
+.x-lbl{font-size:8px;color:#2e2e2e;text-align:center;line-height:1}
+.grid-row-wrap{display:flex;align-items:flex-start}
+.y-labels{display:flex;flex-direction:column;gap:0;margin-right:2px}
+.y-lbl{font-size:8px;color:#2e2e2e;text-align:right;display:flex;align-items:center;justify-content:flex-end;padding-right:2px;line-height:1}
+.grid{display:grid;gap:1px}
+.cell{border:1px solid #181818;border-radius:2px;cursor:crosshair;background:#090909;transition:background .04s,border-color .04s;flex-shrink:0;position:relative}
+.cell:hover{border-color:#333}
+.cell.active{border-color:transparent!important}
+
+/* Điểm tâm: viền vàng nổi bật */
+.cell.center-mark{
+  border-color:#554400 !important;
+  box-shadow: inset 0 0 0 1px #7a6000;
+}
+.cell.center-mark::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background: radial-gradient(circle, rgba(255,200,0,0.18) 0%, transparent 70%);
+  pointer-events:none;
+  border-radius:1px;
+}
+.cell.active.center-mark{
+  box-shadow: inset 0 0 0 1px rgba(255,200,0,0.5);
+  border-color:transparent!important;
+}
+
+.axis-x-label{font-size:9px;color:#2e2e2e;text-align:center;margin-top:4px;width:100%}
+
+/* chú thích tâm */
+.center-legend{font-size:9px;color:#443a00;margin-top:3px;text-align:center;width:100%;letter-spacing:.02em}
+
+.bottom-area{background:#050505;border-top:1px solid #1e1e1e}
+
+.import-section{padding:10px 14px;border-bottom:1px solid #1a1a1a}
+.import-header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.import-header span{font-size:12px;font-weight:500;color:#777}
+.import-hint{font-size:10px;color:#333}
+.import-row{display:flex;gap:6px;align-items:flex-start}
+.import-row textarea{flex:1;min-height:60px;font-family:'Courier New',monospace;font-size:10px;padding:6px 8px;border:1px solid #1e1e1e;border-radius:4px;background:#080808;color:#888;resize:vertical;line-height:1.5;outline:none}
+
+.output-section{padding:10px 14px}
+.out-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.out-header span{font-size:12px;font-weight:500;color:#777}
+.out-count{font-size:11px;color:#333}
+textarea.output{width:100%;min-height:130px;font-family:'Courier New',monospace;font-size:11px;padding:8px;border:1px solid #1e1e1e;border-radius:5px;background:#030303;color:#999;resize:vertical;line-height:1.6;outline:none}
+
+.toast{position:fixed;bottom:18px;right:18px;background:#1a1a1a;border:1px solid #333;border-radius:6px;padding:7px 14px;font-size:12px;color:#aaa;opacity:0;transition:opacity .2s;pointer-events:none;z-index:999}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<h1>MythicMobs Particle Builder</h1>
+
+<div class="toolbar">
+  <div class="field">
+    <label>Màu</label>
+    <div class="color-preview" id="colorPreview" style="background:#fff"></div>
+    <input type="text" id="iColor" value="#ffffff">
+  </div>
+  <div class="sep"></div>
+  <div class="field"><label>Size</label><input type="number" id="iSize" value="0.5" step="0.1" min="0.1" max="5"></div>
+  <div class="field"><label>a</label><input type="number" id="iA" value="1" step="1" min="1" max="20"></div>
+  <div class="field">
+    <label>Particle</label>
+    <select id="iParticle">
+      <option value="reddust">reddust</option>
+      <option value="flame">flame</option>
+      <option value="heart">heart</option>
+      <option value="smoke">smoke</option>
+      <option value="enchantmenttable">enchantmenttable</option>
+      <option value="spell">spell</option>
+      <option value="crit">crit</option>
+      <option value="portal">portal</option>
+    </select>
+  </div>
+  <div class="sep"></div>
+  <button class="danger" onclick="clearAll()">Xoá tất cả</button>
+  <button class="primary" onclick="copyOutput()">Copy code</button>
+</div>
+
+<div class="settings-bar">
+  <div class="field" style="display:flex;align-items:center;gap:5px">
+    <label>Bước nhảy</label>
+    <select id="iStep">
+      <option value="0.1">0.1</option>
+      <option value="0.2" selected>0.2</option>
+      <option value="0.5">0.5</option>
+    </select>
+  </div>
+  <div class="sep" style="width:1px;height:18px;background:#222;margin:0 2px"></div>
+  <div class="field" style="display:flex;align-items:center;gap:5px">
+    <label>Phạm vi ±</label>
+    <select id="iRange">
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+    </select>
+  </div>
+  <div class="sep" style="width:1px;height:18px;background:#222;margin:0 2px"></div>
+  <div class="field" style="display:flex;align-items:center;gap:5px">
+    <label>Y max ±</label>
+    <select id="iYMax">
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+    </select>
+  </div>
+  <span class="hint">→ Đổi cài đặt sẽ xoá lưới</span>
+</div>
+
+<div class="view-toggle-bar" id="viewToggleBar">
+  <span class="vt-label">Hiện mặt:</span>
+  <button class="vtbtn on" data-vid="front" onclick="toggleView('front')">Trước</button>
+  <button class="vtbtn on" data-vid="behind" onclick="toggleView('behind')">Sau</button>
+  <button class="vtbtn on" data-vid="right" onclick="toggleView('right')">Phải</button>
+  <button class="vtbtn on" data-vid="left" onclick="toggleView('left')">Trái</button>
+  <button class="vtbtn on" data-vid="top" onclick="toggleView('top')">Trên</button>
+  <button class="vtbtn on" data-vid="bottom" onclick="toggleView('bottom')">Dưới</button>
+  <div class="vt-sep"></div>
+  <button class="vtbtn-all" onclick="toggleAll(true)">Tất cả</button>
+  <button class="vtbtn-all" onclick="toggleAll(false)">Ẩn hết</button>
+</div>
+<div class="views-container cols-6" id="viewsContainer"></div>
+
+<div class="bottom-area">
+  <div class="import-section">
+    <div class="import-header">
+      <span>Đọc code</span>
+      <span class="import-hint">Paste code MythicMobs vào đây → tự động tích lên lưới</span>
+    </div>
+    <div class="import-row">
+      <textarea id="importInput" placeholder="Paste code particles vào đây...&#10;  - particles{p=reddust;color=#ff0000;a=1;size=0.5;y=1.0;sso=0.0;sfo=1.0}"></textarea>
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <button class="accent" onclick="importCode()" style="white-space:nowrap">Đọc code</button>
+        <button onclick="document.getElementById('importInput').value=''" style="font-size:10px;color:#444">Xoá</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="output-section">
+    <div class="out-header">
+      <span>Code output</span>
+      <span class="out-count" id="countLabel">0 particles</span>
+    </div>
+    <textarea class="output" id="output" readonly placeholder="Tích vào các ô để tạo particle..."></textarea>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// VIEW_DEFS: mỗi view định nghĩa trục X, trục Y, trục cố định và giá trị cố định
+// centerMark(xCoord, yCoord) → ô nào là tâm tham chiếu (sso=0, y=1 nếu có; sso=0,sfo=0 cho top/bottom)
+const VIEW_DEFS = [
+  {id:'front',  label:'Trước mặt', color:'#3a7ab8', xAxis:'sso', yAxis:'y',   fixAxis:'sfo', fixVal:()=>1,
+    isCenterXY:(x,y)=> x===0 && y===1},
+  {id:'behind', label:'Sau lưng',  color:'#7755aa', xAxis:'sso', yAxis:'y',   fixAxis:'sfo', fixVal:()=>-1,
+    isCenterXY:(x,y)=> x===0 && y===1},
+  {id:'right',  label:'Bên phải',  color:'#aa5522', xAxis:'sfo', yAxis:'y',   fixAxis:'sso', fixVal:()=>1,
+    isCenterXY:(x,y)=> x===0 && y===1},
+  {id:'left',   label:'Bên trái',  color:'#aa3366', xAxis:'sfo', yAxis:'y',   fixAxis:'sso', fixVal:()=>-1,
+    isCenterXY:(x,y)=> x===0 && y===1},
+  {id:'top',    label:'Trên đầu',  color:'#337755', xAxis:'sso', yAxis:'sfo', fixAxis:'y',
+    fixVal:()=>parseFloat(document.getElementById('iYMax').value),
+    isCenterXY:(x,y)=> x===0 && y===0},
+  {id:'bottom', label:'Dưới chân', color:'#886622', xAxis:'sso', yAxis:'sfo', fixAxis:'y',   fixVal:()=>0,
+    isCenterXY:(x,y)=> x===0 && y===0},
+];
+
+let state = {};
+let isPainting = false;
+let paintMode = null;
+let visibleViews = new Set(['front','behind','right','left','top','bottom']);
+
+function updateColClass(){
+  const c = document.getElementById('viewsContainer');
+  const n = visibleViews.size;
+  c.className = 'views-container cols-'+(n||1);
+}
+
+function toggleAll(on){
+  VIEW_DEFS.forEach(v=>{
+    if(on) visibleViews.add(v.id); else visibleViews.delete(v.id);
+  });
+  document.querySelectorAll('.vtbtn').forEach(b=>{
+    if(on) b.classList.add('on'); else b.classList.remove('on');
+  });
+  updateColClass();
+  buildGrids();
+}
+
+function toggleView(vid){
+  const b = document.querySelector('.vtbtn[data-vid="'+vid+'"]');
+  if(visibleViews.has(vid)){
+    visibleViews.delete(vid);
+    if(b) b.classList.remove('on');
+  } else {
+    visibleViews.add(vid);
+    if(b) b.classList.add('on');
+  }
+  updateColClass();
+  buildGrids();
+}
+
+function r2(n){ return Math.round(n*100)/100; }
+function fmt(n){ const v=r2(n); return (v%1===0)?v.toFixed(1):v.toString(); }
+
+function makeRange(min,max,step){
+  const arr=[];
+  for(let v=min;v<=max+1e-9;v+=step) arr.push(r2(v));
+  return arr;
+}
+
+function getCellSize(totalCols){
+  if(totalCols<=11) return 14;
+  if(totalCols<=21) return 11;
+  if(totalCols<=31) return 9;
+  if(totalCols<=41) return 8;
+  return 7;
+}
+
+function buildAll(){
+  state={};
+  buildGrids();
+  updateOutput();
+}
+
+function applyCell(cell, key, color, activate){
+  if(activate){
+    state[key]=true;
+    cell.classList.add('active');
+    cell.style.background=color;
+  } else {
+    delete state[key];
+    cell.classList.remove('active');
+    cell.style.background='';
+  }
+}
+
+function buildGrids(){
+  const step  = parseFloat(document.getElementById('iStep').value);
+  const range = parseFloat(document.getElementById('iRange').value);
+  const ymax  = parseFloat(document.getElementById('iYMax').value);
+
+  const container = document.getElementById('viewsContainer');
+  container.innerHTML='';
+
+  VIEW_DEFS.filter(v=>visibleViews.has(v.id)).forEach(v=>{
+    let xVals, yVals;
+    if(v.yAxis==='y'){
+      // Y chạy từ -ymax đến +ymax
+      xVals = makeRange(-range, range, step);
+      yVals = makeRange(-ymax, ymax, step).reverse();
+    } else {
+      // top/bottom: cả hai trục ± range
+      xVals = makeRange(-range, range, step);
+      yVals = makeRange(-range, range, step).reverse();
+    }
+
+    const cs = getCellSize(xVals.length);
+    const panel = document.createElement('div');
+    panel.className='view-panel';
+
+    const title = document.createElement('div');
+    title.className='view-title';
+    title.style.color=v.color;
+    title.textContent=v.label;
+    panel.appendChild(title);
+
+    const gridArea = document.createElement('div');
+    gridArea.className='grid-area';
+
+    // x labels
+    const xLabelRow = document.createElement('div');
+    xLabelRow.className='x-labels-row';
+    xLabelRow.style.marginLeft=(cs+4)+'px';
+    xLabelRow.style.gap='1px';
+    xVals.forEach(x=>{
+      const lbl=document.createElement('div');
+      lbl.className='x-lbl';
+      lbl.style.width=cs+'px';
+      lbl.style.fontSize=(cs<=9)?'7px':'8px';
+      const show=(r2(Math.abs(x))%0.5===0);
+      lbl.textContent=show?(x===0?'0':(x>0?'+'+x:x)):'';
+      xLabelRow.appendChild(lbl);
+    });
+    gridArea.appendChild(xLabelRow);
+
+    const rowWrap = document.createElement('div');
+    rowWrap.className='grid-row-wrap';
+
+    const yLabelCol = document.createElement('div');
+    yLabelCol.className='y-labels';
+    yVals.forEach(y=>{
+      const lbl=document.createElement('div');
+      lbl.className='y-lbl';
+      lbl.style.width=cs+'px';
+      lbl.style.height=cs+'px';
+      lbl.style.fontSize=(cs<=9)?'7px':'8px';
+      const show=(r2(Math.abs(y))%0.5===0);
+      lbl.textContent=show?(y===0?'0':(y>0?'+'+y:y)):'';
+      yLabelCol.appendChild(lbl);
+    });
+    rowWrap.appendChild(yLabelCol);
+
+    const grid = document.createElement('div');
+    grid.className='grid';
+    grid.style.gridTemplateColumns=`repeat(${xVals.length},${cs}px)`;
+    grid.style.gap='1px';
+
+    yVals.forEach(yv=>{
+      xVals.forEach(xv=>{
+        const cell = document.createElement('div');
+        cell.className='cell';
+        cell.style.width=cs+'px';
+        cell.style.height=cs+'px';
+        const key=v.id+'|'+xv+'|'+yv;
+
+        // Đánh dấu tâm
+        if(v.isCenterXY(xv, yv)){
+          cell.classList.add('center-mark');
+          cell.title = `Tâm: ${v.xAxis}=${fmt(xv)}, ${v.yAxis}=${fmt(yv)}`;
+        }
+
+        if(state[key]){
+          cell.classList.add('active');
+          cell.style.background=v.color;
+        }
+
+        cell.addEventListener('mousedown', e=>{
+          e.preventDefault();
+          isPainting=true;
+          paintMode = !state[key];
+          applyCell(cell, key, v.color, paintMode);
+          updateOutput();
+        });
+
+        cell.addEventListener('mouseenter', e=>{
+          if(!isPainting) return;
+          applyCell(cell, key, v.color, paintMode);
+          updateOutput();
+        });
+
+        cell.addEventListener('touchmove', e=>{
+          e.preventDefault();
+          const t=e.touches[0];
+          const el=document.elementFromPoint(t.clientX,t.clientY);
+          if(el && el.classList.contains('cell') && el!==cell){
+            el.dispatchEvent(new MouseEvent('mouseenter'));
+          }
+        },{passive:false});
+
+        grid.appendChild(cell);
+      });
+    });
+
+    rowWrap.appendChild(grid);
+    gridArea.appendChild(rowWrap);
+
+    const axisX=document.createElement('div');
+    axisX.className='axis-x-label';
+    axisX.textContent=(v.xAxis==='sso')?'← sso (trái / phải) →':'← sfo (sau / trước) →';
+    gridArea.appendChild(axisX);
+
+    // Chú thích điểm tâm
+    const centerNote=document.createElement('div');
+    centerNote.className='center-legend';
+    if(v.yAxis==='y'){
+      centerNote.textContent='⬛ viền vàng = sso=0, y=1';
+    } else {
+      centerNote.textContent='⬛ viền vàng = sso=0, sfo=0';
+    }
+    gridArea.appendChild(centerNote);
+
+    panel.appendChild(gridArea);
+    container.appendChild(panel);
+  });
+}
+
+document.addEventListener('mouseup',()=>{ isPainting=false; });
+document.addEventListener('mouseleave',()=>{ isPainting=false; });
+
+function updateOutput(){
+  const p=document.getElementById('iParticle').value;
+  const color=document.getElementById('iColor').value;
+  const size=parseFloat(document.getElementById('iSize').value)||0.5;
+  const a=parseInt(document.getElementById('iA').value)||1;
+  const isReddust=(p==='reddust');
+
+  const lines=[];
+  let total=0;
+
+  VIEW_DEFS.forEach(v=>{
+    const fixVal=v.fixVal();
+    const found=[];
+    Object.keys(state).forEach(key=>{
+      if(!key.startsWith(v.id+'|')) return;
+      const parts=key.split('|');
+      const xv=parseFloat(parts[1]);
+      const yv=parseFloat(parts[2]);
+      const coords={sso:0,y:1,sfo:0};
+      coords[v.xAxis]=xv;
+      coords[v.yAxis]=yv;
+      coords[v.fixAxis]=fixVal;
+      let line=`  - particles{p=${p};`;
+      if(isReddust) line+=`color=${color};`;
+      line+=`a=${a};size=${size};y=${fmt(coords.y)};sso=${fmt(coords.sso)};sfo=${fmt(coords.sfo)}}`;
+      found.push(line);
+      total++;
+    });
+    if(found.length){
+      lines.push(`  ###########################`);
+      lines.push(`  # ${v.label}`);
+      lines.push(`  ###########################`);
+      found.forEach(l=>lines.push(l));
+    }
+  });
+
+  document.getElementById('output').value=lines.join('\n');
+  document.getElementById('countLabel').textContent=total+' particles';
+}
+
+// ── IMPORT ──────────────────────────────────────────────
+function importCode(){
+  const raw = document.getElementById('importInput').value;
+  if(!raw.trim()){ showToast('Không có code để đọc'); return; }
+
+  const step  = parseFloat(document.getElementById('iStep').value);
+  const range = parseFloat(document.getElementById('iRange').value);
+  const ymax  = parseFloat(document.getElementById('iYMax').value);
+
+  const regex = /particles\{([^}]+)\}/g;
+  let match;
+  let imported=0, skipped=0;
+
+  while((match=regex.exec(raw))!==null){
+    const props={};
+    match[1].split(';').forEach(part=>{
+      const [k,val]=part.split('=');
+      if(k&&val!==undefined) props[k.trim()]=val.trim();
+    });
+
+    const sso = parseFloat(props.sso??0);
+    const sfo = parseFloat(props.sfo??0);
+    const y   = parseFloat(props.y??1);
+
+    if(isNaN(sso)||isNaN(sfo)||isNaN(y)){ skipped++; continue; }
+
+    const snap = v => r2(Math.round(v/step)*step);
+    const ssS=snap(sso), sfoS=snap(sfo), yS=snap(y);
+
+    if(props.p==='reddust' && props.color){
+      document.getElementById('iColor').value=props.color;
+      document.getElementById('colorPreview').style.background=props.color;
+    }
+    if(props.p) document.getElementById('iParticle').value=props.p;
+    if(props.size) document.getElementById('iSize').value=props.size;
+    if(props.a) document.getElementById('iA').value=props.a;
+
+    let matched=false;
+    VIEW_DEFS.forEach(v=>{
+      const fv = v.fixVal();
+      const fixCoord = v.fixAxis==='sso'?ssS : v.fixAxis==='sfo'?sfoS : yS;
+      if(Math.abs(fixCoord-fv)<1e-9){
+        const xCoord = v.xAxis==='sso'?ssS : v.xAxis==='sfo'?sfoS : yS;
+        const yCoord = v.yAxis==='y'?yS : v.yAxis==='sfo'?sfoS : ssS;
+        const xRange2 = range;
+        const yRange2 = (v.yAxis==='y')?ymax:range;
+        if(Math.abs(xCoord)<=xRange2+1e-9 && Math.abs(yCoord)<=yRange2+1e-9){
+          const key=v.id+'|'+xCoord+'|'+yCoord;
+          state[key]=true;
+          matched=true;
+        }
+      }
+    });
+    if(matched) imported++; else skipped++;
+  }
+
+  if(imported===0){ showToast('Không khớp ô nào — thử điều chỉnh Bước nhảy / Phạm vi'); }
+  else { showToast(`Đã tích ${imported} particle${skipped?' (bỏ qua '+skipped+')':''}`); }
+
+  buildGrids();
+  updateOutput();
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+function clearAll(){
+  state={};
+  buildGrids();
+  updateOutput();
+}
+
+function copyOutput(){
+  const val=document.getElementById('output').value;
+  if(!val) return;
+  navigator.clipboard.writeText(val).then(()=>{
+    showToast('Đã copy!');
+  });
+}
+
+document.getElementById('iColor').addEventListener('input',function(){
+  document.getElementById('colorPreview').style.background=this.value;
+  updateOutput();
+});
+['iSize','iA','iParticle'].forEach(id=>document.getElementById(id).addEventListener('input',updateOutput));
+['iStep','iRange','iYMax'].forEach(id=>document.getElementById(id).addEventListener('change',buildAll));
+
+updateColClass();
+buildGrids();
+updateOutput();
+</script>
+</body>
+</html>

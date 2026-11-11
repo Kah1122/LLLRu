@@ -1,0 +1,36 @@
+<script>
+    const particles = `
+    Angry_Villager Ash Barrier Block
+    Block_Crumble Block_Dust Block_Marker Bubble
+    Bubble_Column_Up Bubble_Pop Campfire_Cosy_Smoke Campfire_Signal_Smoke
+    Cherry_Leaves Cloud Composter Copper_Fire_Flame
+    Crimson_Spore Crit Current_Down Damage_Indicator
+    Dolphin Dragon_Breath Dripping_Dripstone_Lava Dripping_Dripstone_Water
+    Dripping_Honey Dripping_Lava Dripping_Obsidian_Tear Dripping_Water
+    Dust Dust_Color_Transition Dust_Pillar Dust_Plume
+    Effect Egg_Crack Elder_Guardian Electric_Spark Enchant
+    Enchanted_Hit End_Rod Entity_Effect Explosion
+    Explosion_Emitter Falling_Dripstone_Lava Falling_Dripstone_Water Falling_Dust
+    Falling_Honey Falling_Lava Falling_Nectar Falling_Obsidian_Tear
+    Falling_Spore_Blossom Falling_Water Firefly Firework
+    Fishing Flame Flash Glow Glow_Squid_Ink
+    Gust Gust_Emitter_Large Gust_Emitter_Small Happy_Villager
+    Heart Infested Instant_Effect Item Item_Slime
+    Item_Snowball Landing_Honey Landing_Lava Landing_Obsidian_Tear Large_Smoke
+    Lava Light Mycelium Nautilus Note
+    Ominous_Spawning Pale_Oak_Leaves Poof Portal Raid_Omen
+    Rain Reverse_Portal Scrape Sculk_Charge Sculk_Charge_Pop
+    Sculk_Soul Shriek Small_Flame Small_Gust Smoke
+    Sneeze Snowflake Sonic_Boom Soul Soul_Fire_Flame
+    Spell_Mob_Ambient Spit Splash Spore_Blossom_Air
+    Squid_Ink Suspended_Depth Sweep_Attack Tinted_Leaves
+    Totem_Of_Undying Trail Trial_Omen Trial_Spawner_Detection
+    Trial_Spawner_Detection_Ominous Underwater Vault_Connection Vibration
+    Warped_Spore Wax_Off Wax_On White_Ash White_Smoke Witch
+    `.trim().split(/\s+/);
+
+    const randomParticle =
+        particles[Math.floor(Math.random() * particles.length)];
+
+    alert(randomParticle);
+</script>
