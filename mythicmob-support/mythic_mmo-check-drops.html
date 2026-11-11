@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MMOItems Drop Viewer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --bg-darker: #0a0a0a;
+            --card-bg: #1e1e1e;
+            --card-border: #2e2e2e;
+            --text-primary: #f0f0f0;
+            --text-secondary: #b0b0b0;
+            --accent-blue: #4a8fe7;
+            --accent-green: #4caf7d;
+            --accent-red: #e74c4c;
+            --accent-purple: #9c4ae7;
+            --highlight: rgba(74, 143, 231, 0.1);
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            line-height: 1.5;
+        }
+
+        /* Color code styles - must come after base styles */
+        .color-black { color: #000000; }
+        .color-dark-blue { color: #0000AA; }
+        .color-dark-green { color: #00AA00; }
+        .color-dark-aqua { color: #00AAAA; }
+        .color-dark-red { color: #AA0000; }
+        .color-dark-purple { color: #AA00AA; }
+        .color-gold { color: #FFAA00; }
+        .color-gray { color: #AAAAAA; }
+        .color-dark-gray { color: #555555; }
+        .color-blue { color: #5555FF; }
+        .color-green { color: #55FF55; }
+        .color-aqua { color: #55FFFF; }
+        .color-red { color: #FF5555; }
+        .color-light-purple { color: #FF55FF; }
+        .color-yellow { color: #FFFF55; }
+        .color-white { color: #FFFFFF; }
+        .bold { font-weight: bold; }
+        .strikethrough { text-decoration: line-through; }
+        .underline { text-decoration: underline; }
+        .italic { font-style: italic; }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-header {
+            background-color: var(--bg-darker);
+            border-bottom: 1px solid var(--card-border);
+            padding: 12px 16px;
+            font-weight: 600;
+        }
+
+        .file-tab {
+            cursor: pointer;
+            padding: 8px 16px;
+            background-color: var(--bg-darker);
+            border: 1px solid var(--card-border);
+            margin-right: 6px;
+            font-size: 0.85rem;
+            border-radius: 6px;
+            transition: all 0.15s ease;
+        }
+
+        .file-tab:hover {
+            background-color: var(--card-bg);
+        }
+
+        .file-tab.active {
+            background-color: var(--accent-blue);
+            border-color: var(--accent-blue);
+            color: white;
+        }
+
+        .badge-count {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-weight: 500;
+            padding: 3px 8px;
+        }
+
+        .badge-priority {
+            background-color: var(--accent-purple);
+        }
+
+        .badge-error {
+            background-color: var(--accent-red);
+        }
+
+        .mob-entry {
+            padding: 12px;
+            border-bottom: 1px solid var(--card-border);
+            transition: background-color 0.15s ease;
+        }
+
+        .mob-entry:last-child {
+            border-bottom: none;
+        }
+
+        .mob-entry:hover {
+            background-color: var(--highlight);
+        }
+
+        .mob-name {
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .drop-entry {
+            padding: 6px 0;
+            margin-left: 8px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            font-size: 0.9rem;
+        }
+
+        .drop-chance {
+            color: var(--accent-green);
+            font-weight: 500;
+            background-color: rgba(76, 175, 125, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .category-tag {
+            background-color: var(--bg-darker);
+            color: var(--accent-blue);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+
+        .missing-item {
+            color: var(--accent-red);
+            font-weight: 500;
+        }
+
+        #contentArea {
+            max-height: 60vh;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .empty-state {
+            padding: 24px;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        .btn-action {
+            background-color: var(--accent-blue);
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-weight: 500;
+            transition: transform 0.15s ease;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-action:active {
+            transform: translateY(0);
+        }
+
+        .form-input {
+            background-color: var(--bg-darker);
+            border: 1px solid var(--card-border);
+            color: var(--text-primary);
+            border-radius: 6px;
+            padding: 8px 12px;
+        }
+
+        .form-input:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 2px rgba(74, 143, 231, 0.2);
+        }
+
+        .priority-item {
+            border-left: 2px solid var(--accent-purple);
+            padding-left: 8px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-darker);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-blue);
+            border-radius: 3px;
+        }
+
+        .file-tabs-container {
+            display: flex;
+            padding: 8px;
+            overflow-x: auto;
+            background-color: var(--bg-darker);
+        }
+
+        .section-title {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-3">
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fas fa-upload"></i>
+                    <span>Drop Configuration</span>
+                </div>
+                <button id="togglePriority" class="btn-action btn-sm">
+                    <i class="fas fa-star"></i>
+                    <span>Priority</span>
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <div class="section-title">
+                            <i class="fas fa-ghost"></i>
+                            <span>MythicMobs</span>
+                        </div>
+                        <input type="file" id="mobsFolder" webkitdirectory directory multiple class="form-input w-100">
+                    </div>
+                    <div class="col-md-6">
+                        <div class="section-title">
+                            <i class="fas fa-cube"></i>
+                            <span>MMOItems</span>
+                        </div>
+                        <input type="file" id="itemsFolder" webkitdirectory directory multiple class="form-input w-100">
+                    </div>
+                </div>
+                <button id="analyzeBtn" class="btn-action w-100" disabled>
+                    <i class="fas fa-search"></i>
+                    <span>Analyze Drops</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fas fa-list-ul"></i>
+                    <span>Drop Results</span>
+                </div>
+                <div class="d-flex gap-2">
+                    <span class="badge-count" id="mobCount">0</span>
+                    <span class="badge-count badge-error" id="errorCount" style="display: none;">0</span>
+                </div>
+            </div>
+            <div class="file-tabs-container" id="fileTabs" style="display: none;">
+                <!-- File tabs will appear here -->
+            </div>
+            <div id="contentArea">
+                <div class="empty-state">
+                    <i class="fas fa-cloud-upload-alt fa-2x mb-3"></i>
+                    <div>Upload configuration files to analyze drops</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobsFolderInput = document.getElementById('mobsFolder');
+            const itemsFolderInput = document.getElementById('itemsFolder');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const fileTabs = document.getElementById('fileTabs');
+            const contentArea = document.getElementById('contentArea');
+            const mobCount = document.getElementById('mobCount');
+            const errorCount = document.getElementById('errorCount');
+            const togglePriorityBtn = document.getElementById('togglePriority');
+            
+            let mobsData = {};
+            let itemsData = {};
+            let currentFile = null;
+            let totalErrors = 0;
+            let showPriorityOnly = false;
+            
+            // Priority item types (non-MATERIAL)
+            const priorityTypes = ['SWORD', 'AXE', 'DAGGER', 'HAMMER', 'KATANA', 'LANCE', 
+                                  'LONG_SWORD', 'GREATAXE', 'GREATBOW', 'GREATHAMMER', 
+                                  'GREATSTAFF', 'GREATSWORD', 'HALBERD', 'SPEAR', 'STAFF', 
+                                  'STAVE', 'THRUSTING_SWORD', 'WHIP', 'BOW', 'CROSSBOW', 
+                                  'MUSKET', 'WAND', 'TOME', 'LUTE', 'CATALYST', 'MAIN_CATALYST', 
+                                  'OFF_CATALYST', 'ACCESSORY', 'TALISMAN', 'ORNAMENT', 
+                                  'GAUNTLET', 'SHIELD', 'CONSUMABLE', 'GEM_STONE', 
+                                  'MISCELLANEOUS', 'TOOL', 'SKIN', 'BLOCK'];
+            
+            // Minecraft color code to class mapping
+            const colorCodeToClass = {
+                '0': 'color-black',
+                '1': 'color-dark-blue',
+                '2': 'color-dark-green',
+                '3': 'color-dark-aqua',
+                '4': 'color-dark-red',
+                '5': 'color-dark-purple',
+                '6': 'color-gold',
+                '7': 'color-gray',
+                '8': 'color-dark-gray',
+                '9': 'color-blue',
+                'a': 'color-green',
+                'b': 'color-aqua',
+                'c': 'color-red',
+                'd': 'color-light-purple',
+                'e': 'color-yellow',
+                'f': 'color-white',
+                'k': '', // Obfuscated - not supported
+                'l': 'bold',
+                'm': 'strikethrough',
+                'n': 'underline',
+                'o': 'italic',
+                'r': '' // Reset
+            };
+            
+            // Event listeners
+            mobsFolderInput.addEventListener('change', () => analyzeBtn.disabled = !(mobsFolderInput.files.length && itemsFolderInput.files.length));
+            itemsFolderInput.addEventListener('change', () => analyzeBtn.disabled = !(mobsFolderInput.files.length && itemsFolderInput.files.length));
+            analyzeBtn.addEventListener('click', analyzeData);
+            togglePriorityBtn.addEventListener('click', togglePriorityView);
+            
+            function togglePriorityView() {
+                showPriorityOnly = !showPriorityOnly;
+                togglePriorityBtn.innerHTML = showPriorityOnly 
+                    ? '<i class="fas fa-list"></i><span>All</span>' 
+                    : '<i class="fas fa-star"></i><span>Priority</span>';
+                if (currentFile) {
+                    showFileContent(currentFile);
+                }
+            }
+            
+            // Function to apply Minecraft color codes to text
+            function applyMinecraftColors(text) {
+                if (!text) return text;
+                
+                // Replace both § and & format codes
+                let result = '';
+                let currentClasses = [];
+                let inSpan = false;
+                
+                // Process each character
+                for (let i = 0; i < text.length; i++) {
+                    if (text[i] === '§' || text[i] === '&') {
+                        if (i + 1 < text.length) {
+                            const code = text[i+1].toLowerCase();
+                            if (colorCodeToClass.hasOwnProperty(code)) {
+                                // Close previous span if open
+                                if (inSpan) {
+                                    result += '</span>';
+                                    inSpan = false;
+                                }
+                                
+                                // Handle reset
+                                if (code === 'r') {
+                                    currentClasses = [];
+                                } 
+                                // Handle formatting
+                                else {
+                                    const newClass = colorCodeToClass[code];
+                                    if (newClass) {
+                                        currentClasses.push(newClass);
+                                    }
+                                    
+                                    // Open new span with all current classes
+                                    if (currentClasses.length > 0) {
+                                        result += `<span class="${currentClasses.join(' ')}">`;
+                                        inSpan = true;
+                                    }
+                                }
+                                i++; // Skip next character
+                                continue;
+                            }
+                        }
+                    }
+                    result += text[i];
+                }
+                
+                // Close any open span
+                if (inSpan) {
+                    result += '</span>';
+                }
+                
+                return result;
+            }
+            
+            async function analyzeData() {
+                analyzeBtn.disabled = true;
+                analyzeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Analyzing</span>';
+                totalErrors = 0;
+                
+                try {
+                    mobsData = {};
+                    itemsData = {};
+                    
+                    // Process items first
+                    await processItems(Array.from(itemsFolderInput.files));
+                    
+                    // Process mobs
+                    await processMobs(Array.from(mobsFolderInput.files));
+                    
+                    displayFileTabs();
+                    analyzeBtn.innerHTML = '<i class="fas fa-check"></i><span>Analysis Complete</span>';
+                    
+                    // Show error count if any
+                    if (totalErrors > 0) {
+                        errorCount.textContent = totalErrors;
+                        errorCount.style.display = 'flex';
+                    } else {
+                        errorCount.style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    contentArea.innerHTML = `
+                        <div class="alert alert-danger p-2 m-2 d-flex align-items-center gap-2">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <div>Error processing files</div>
+                        </div>
+                    `;
+                    analyzeBtn.innerHTML = '<i class="fas fa-times"></i><span>Error</span>';
+                } finally {
+                    setTimeout(() => {
+                        analyzeBtn.innerHTML = '<i class="fas fa-search"></i><span>Analyze</span>';
+                        analyzeBtn.disabled = false;
+                    }, 1000);
+                }
+            }
+            
+            async function processItems(files) {
+                for (const file of files) {
+                    if (!file.name.endsWith('.yml')) continue;
+                    
+                    try {
+                        const content = await readFile(file);
+                        const yamlData = jsyaml.load(content);
+                        const category = file.name.replace('.yml', '').toUpperCase();
+                        
+                        for (const id in yamlData) {
+                            const item = yamlData[id];
+                            itemsData[`${category}:${id}`] = {
+                                name: applyMinecraftColors(item.base?.name) || `Unknown ${category} ${id}`,
+                                category: category,
+                                type: category
+                            };
+                        }
+                    } catch (error) {
+                        console.error(`Error processing ${file.name}:`, error);
+                    }
+                }
+            }
+            
+            async function processMobs(files) {
+                const fileGroups = {};
+                
+                for (const file of files) {
+                    if (!file.name.endsWith('.yml')) continue;
+                    
+                    try {
+                        const content = await readFile(file);
+                        const yamlData = jsyaml.load(content);
+                        const fileName = file.name;
+                        
+                        for (const mobId in yamlData) {
+                            const mob = yamlData[mobId];
+                            if (typeof mob !== 'object') continue;
+                            
+                            const drops = (mob.Drops || []).map(drop => {
+                                const match = typeof drop === 'string' && drop.match(/mmoitems\{type=([^;]+);id=([^\}]+)\}/);
+                                if (!match) return null;
+                                
+                                const parts = drop.split(' ');
+                                const itemType = match[1].toUpperCase();
+                                const itemId = `${itemType}:${match[2]}`;
+                                const exists = !!itemsData[itemId];
+                                if (!exists) totalErrors++;
+                                
+                                return {
+                                    itemId: itemId,
+                                    itemType: itemType,
+                                    quantity: parts.length > 1 ? parseInt(parts[1]) || 1 : 1,
+                                    chance: parts.length > 2 ? parseFloat(parts[2]) || 0 : 0,
+                                    exists: exists,
+                                    isPriority: priorityTypes.includes(itemType)
+                                };
+                            }).filter(Boolean);
+                            
+                            if (drops.length > 0) {
+                                fileGroups[fileName] = fileGroups[fileName] || { 
+                                    mobs: [], 
+                                    dropCount: 0,
+                                    errorCount: 0,
+                                    priorityCount: 0
+                                };
+                                
+                                const mobErrors = drops.filter(d => !d.exists).length;
+                                const mobPriority = drops.filter(d => d.isPriority).length;
+                                fileGroups[fileName].errorCount += mobErrors;
+                                fileGroups[fileName].priorityCount += mobPriority;
+                                
+                                fileGroups[fileName].mobs.push({
+                                    id: mobId,
+                                    name: applyMinecraftColors(mob.Display) || mobId,
+                                    drops: drops,
+                                    errorCount: mobErrors,
+                                    priorityCount: mobPriority
+                                });
+                                fileGroups[fileName].dropCount += drops.length;
+                            }
+                        }
+                    } catch (error) {
+                        console.error(`Error processing ${file.name}:`, error);
+                    }
+                }
+                
+                mobsData = fileGroups;
+            }
+            
+            function displayFileTabs() {
+                fileTabs.innerHTML = '';
+                fileTabs.style.display = 'flex';
+                
+                // Sort files by priority count first, then by total drops
+                const files = Object.entries(mobsData)
+                    .sort((a, b) => {
+                        if (b[1].priorityCount !== a[1].priorityCount) {
+                            return b[1].priorityCount - a[1].priorityCount;
+                        }
+                        return b[1].dropCount - a[1].dropCount;
+                    })
+                    .map(([fileName]) => fileName);
+                
+                if (files.length === 0) {
+                    contentArea.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <div>No mobs with drops found</div>
+                        </div>
+                    `;
+                    mobCount.textContent = '0';
+                    return;
+                }
+                
+                // Calculate total mob count
+                const totalMobs = Object.values(mobsData).reduce((sum, file) => sum + file.mobs.length, 0);
+                mobCount.textContent = totalMobs;
+                
+                files.forEach(fileName => {
+                    const fileData = mobsData[fileName];
+                    const tab = document.createElement('div');
+                    tab.className = 'file-tab';
+                    tab.innerHTML = `
+                        <span>${fileName}</span>
+                        <span class="badge-count">${fileData.mobs.length}</span>
+                        ${fileData.priorityCount > 0 ? `<span class="badge-count badge-priority">${fileData.priorityCount}</span>` : ''}
+                        ${fileData.errorCount > 0 ? `<span class="badge-count badge-error">${fileData.errorCount}</span>` : ''}
+                    `;
+                    tab.addEventListener('click', () => {
+                        currentFile = fileName;
+                        showFileContent(fileName);
+                    });
+                    fileTabs.appendChild(tab);
+                });
+                
+                // Show first file by default
+                currentFile = files[0];
+                showFileContent(files[0]);
+                fileTabs.children[0].classList.add('active');
+            }
+            
+            function showFileContent(fileName) {
+                // Set active tab
+                Array.from(fileTabs.children).forEach(tab => {
+                    tab.classList.toggle('active', tab.textContent.includes(fileName));
+                });
+                
+                const fileData = mobsData[fileName];
+                if (!fileData) return;
+                
+                let html = '';
+                
+                // Sort mobs by priority count first
+                const sortedMobs = [...fileData.mobs].sort((a, b) => b.priorityCount - a.priorityCount);
+                
+                sortedMobs.forEach(mob => {
+                    // Sort drops - priority items first
+                    const sortedDrops = [...mob.drops].sort((a, b) => {
+                        if (a.isPriority && !b.isPriority) return -1;
+                        if (!a.isPriority && b.isPriority) return 1;
+                        return 0;
+                    });
+                    
+                    // Filter if showing priority only
+                    const displayDrops = showPriorityOnly 
+                        ? sortedDrops.filter(drop => drop.isPriority)
+                        : sortedDrops;
+                    
+                    if (displayDrops.length === 0) return;
+                    
+                    html += `
+                        <div class="mob-entry">
+                            <div class="mob-name">
+                                <i class="fas fa-ghost"></i>
+                                <span>${mob.name}</span>
+                                ${mob.errorCount > 0 ? `<span class="badge-count badge-error">${mob.errorCount}</span>` : ''}
+                                ${mob.priorityCount > 0 ? `<span class="badge-count badge-priority">${mob.priorityCount}</span>` : ''}
+                            </div>
+                            ${displayDrops.map(drop => {
+                                const item = itemsData[drop.itemId];
+                                
+                                if (!drop.exists) {
+                                    return `
+                                        <div class="drop-entry missing-item ${drop.isPriority ? 'priority-item' : ''}">
+                                            <i class="fas fa-question-circle"></i>
+                                            <span>${drop.itemId}</span>
+                                            <span class="drop-chance">${(drop.chance * 100).toFixed(1)}%</span>
+                                            <span class="text-secondary">x${drop.quantity}</span>
+                                        </div>
+                                    `;
+                                }
+                                
+                                if (!item) return '';
+                                
+                                return `
+                                    <div class="drop-entry ${drop.isPriority ? 'priority-item' : ''}">
+                                        <i class="fas fa-cube"></i>
+                                        <span>${item.name}</span>
+                                        <span class="category-tag">${item.category}</span>
+                                        <span class="drop-chance">${(drop.chance * 100).toFixed(1)}%</span>
+                                        <span class="text-secondary">x${drop.quantity}</span>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    `;
+                });
+                
+                contentArea.innerHTML = html || `
+                    <div class="empty-state">
+                        <i class="fas fa-info-circle"></i>
+                        <div>No matching drops in this file</div>
+                    </div>
+                `;
+            }
+            
+            function readFile(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = e => resolve(e.target.result);
+                    reader.onerror = e => reject(new Error('File read error'));
+                    reader.readAsText(file);
+                });
+            }
+        });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+</body>
+</html>
