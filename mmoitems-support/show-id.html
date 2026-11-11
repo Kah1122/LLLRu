@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Liệt kê ID từ config</title>
+  <!-- Phần CSS giữ nguyên như trước -->
+  <style>
+    :root {
+      --bg-color: #1a1a1a;
+      --text-color: #e0e0e0;
+      --primary-color: #4a6fa5;
+      --primary-hover: #3a5a8c;
+      --input-bg: #2d2d2d;
+      --input-border: #444;
+      --card-bg: #252525;
+      --scrollbar-thumb: #444;
+      --scrollbar-track: #2d2d2d;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: var(--primary-color);
+      text-align: center;
+      margin-bottom: 25px;
+      font-weight: 300;
+      border-bottom: 1px solid var(--primary-color);
+      padding-bottom: 10px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 200px;
+      margin-bottom: 15px;
+      padding: 12px;
+      font-size: 14px;
+      border-radius: 6px;
+      border: 1px solid var(--input-border);
+      background-color: var(--input-bg);
+      color: var(--text-color);
+      resize: vertical;
+      transition: border-color 0.3s;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(74, 111, 165, 0.2);
+    }
+
+    .button-container {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    button {
+      padding: 12px 25px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    button:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    button:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    #id-list {
+      margin-top: 20px;
+      padding: 20px;
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      max-height: 400px;
+      overflow-y: auto;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    #id-list ul {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    #id-list li {
+      padding: 10px 15px;
+      background-color: rgba(74, 111, 165, 0.1);
+      border-radius: 4px;
+      border-left: 3px solid var(--primary-color);
+      transition: all 0.2s;
+    }
+
+    #id-list li:hover {
+      background-color: rgba(74, 111, 165, 0.2);
+      transform: translateX(5px);
+    }
+
+    #id-list.empty {
+      text-align: center;
+      color: #999;
+      font-style: italic;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--scrollbar-track);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--scrollbar-thumb);
+      border-radius: 5px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+      body {
+        padding: 15px;
+      }
+      
+      #id-list {
+        padding: 15px;
+      }
+      
+      #id-list li {
+        padding: 8px 12px;
+        font-size: 14px;
+      }
+    }
+
+    /* Copy button style */
+    .copy-btn {
+      margin-top: 15px;
+      background-color: #5cb85c;
+    }
+    
+    .copy-btn:hover {
+      background-color: #4cae4c;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Liệt kê các ID trong cấu hình</h1>
+
+    <textarea id="configInput" placeholder="Dán cấu hình vào đây..."></textarea>
+    
+    <div class="button-container">
+      <button onclick="extractIDs()">Liệt kê ID</button>
+      <button class="copy-btn" onclick="copyIDs()">Sao chép ID</button>
+    </div>
+
+    <div id="id-list" class="empty">Kết quả ID sẽ hiển thị ở đây...</div>
+  </div>
+
+  <script>
+    function extractIDs() {
+      const inputText = document.getElementById('configInput').value;
+      const regex = /^(\S+):/gm;
+      const matches = [];
+      let match;
+
+      while ((match = regex.exec(inputText)) !== null) {
+        matches.push(match[1]);
+      }
+
+      // Phân loại ID
+      const numericItems = [];
+      const nonNumericIds = [];
+      
+      matches.forEach(id => {
+        // Kiểm tra nếu là số (có thể có dấu nháy)
+        const numMatch = id.match(/^'?(\d+)'?$/);
+        if (numMatch) {
+          const numValue = parseInt(numMatch[1]);
+          numericItems.push({
+            value: numValue,
+            raw: id.includes("'") ? `'${numValue}'` : numValue.toString()
+          });
+        } else {
+          nonNumericIds.push(id);
+        }
+      });
+      
+      // Sắp xếp số tăng dần
+      numericItems.sort((a, b) => a.value - b.value);
+      
+      // Sắp xếp chữ theo alphabet
+      nonNumericIds.sort((a, b) => a.localeCompare(b));
+      
+      // Kết hợp kết quả: số trước, chữ sau
+      const sortedIds = [
+        ...numericItems.map(item => item.raw),
+        ...nonNumericIds
+      ];
+
+      const idListContainer = document.getElementById('id-list');
+      idListContainer.innerHTML = '';
+      idListContainer.classList.remove('empty');
+
+      if (sortedIds.length > 0) {
+        const ul = document.createElement('ul');
+        sortedIds.forEach(id => {
+          const li = document.createElement('li');
+          li.textContent = id;
+          ul.appendChild(li);
+        });
+        idListContainer.appendChild(ul);
+      } else {
+        idListContainer.textContent = 'Không tìm thấy ID nào.';
+        idListContainer.classList.add('empty');
+      }
+    }
+
+    function copyIDs() {
+      const idItems = document.querySelectorAll('#id-list li');
+      if (idItems.length === 0) {
+        alert('Không có ID nào để sao chép!');
+        return;
+      }
+      
+      const ids = Array.from(idItems).map(li => li.textContent).join('\n');
+      navigator.clipboard.writeText(ids)
+        .then(() => alert('Đã sao chép ' + idItems.length + ' ID vào clipboard!'))
+        .catch(err => alert('Lỗi khi sao chép: ' + err));
+    }
+  </script>
+</body>
+</html>

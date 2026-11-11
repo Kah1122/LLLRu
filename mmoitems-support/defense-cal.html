@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boss Damage Calculator</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-color: #1e1e1e;
+            --text-color: #f5f5f5;
+            --input-bg: #2c2c2c;
+            --input-border: #444;
+            --button-bg: #4CAF50;
+            --button-hover: #45a049;
+            --result-bg: #1f2d1f;
+            --formula-bg: #2a2a2a;
+            --bonus-bg: #1a2a40;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-color);
+        }
+
+        .calculator {
+            background: var(--card-color);
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            max-width: 550px;
+            width: 100%;
+        }
+
+        h1 {
+            color: var(--text-color);
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 26px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+            color: #ddd;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 5px;
+            font-size: 16px;
+            color: var(--text-color);
+        }
+
+        button {
+            background: var(--button-bg);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: var(--button-hover);
+        }
+
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background: var(--result-bg);
+            border-radius: 5px;
+            display: none;
+        }
+
+        .highlight {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .formula {
+            background: var(--formula-bg);
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-family: monospace;
+            text-align: center;
+            color: #ccc;
+        }
+
+        .equipment-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .equipment-grid div {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .set-bonus {
+            background: var(--bonus-bg);
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h1>💥 Defence Armor Calculator</h1>
+        
+        <div class="formula">
+            <strong>Công thức:</strong><br>
+            <code>Damage * (1 - (Defense / (K * Damage + Defense)))</code>
+        </div>
+
+        <div class="form-group">
+            <label for="damage">💀 Sát thương gốc (Boss):</label>
+            <input type="number" id="damage" value="100" min="1">
+        </div>
+
+        <div class="form-group">
+            <label>🛡️ Trang bị phòng thủ:</label>
+            <div class="equipment-grid">
+                <div>
+                    <label for="hat">Mũ:</label>
+                    <input type="number" id="hat" placeholder="DEF" min="0" value="10">
+                </div>
+                <div>
+                    <label for="armor">Áo:</label>
+                    <input type="number" id="armor" placeholder="DEF" min="0" value="20">
+                </div>
+                <div>
+                    <label for="pants">Quần:</label>
+                    <input type="number" id="pants" placeholder="DEF" min="0" value="15">
+                </div>
+                <div>
+                    <label for="boots">Giày:</label>
+                    <input type="number" id="boots" placeholder="DEF" min="0" value="5">
+                </div>
+            </div>
+        </div>
+
+        <div class="set-bonus">
+            <div class="form-group">
+                <label for="set-bonus">⚜️ Bonus full set (DEF cộng thêm):</label>
+                <input type="number" id="set-bonus" placeholder="Nhập bonus DEF full set" min="0" value="50">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="defense">✨ Phòng thủ bổ sung của talisman:</label>
+            <input type="number" id="defense" placeholder="Nhập defense bổ sung" min="0" value="0">
+        </div>
+
+        <div class="form-group">
+            <label for="k-factor">Hệ số K (Cân bằng):</label>
+            <select id="k-factor">
+                <option value="2.5">K = 2.5 (Boss mạnh)</option>
+                <option value="5">K = 5 (Boss thường)</option>
+                <option value="1">K = 1 (Boss yếu)</option>
+                <option value="custom">Tùy chỉnh K</option>
+            </select>
+        </div>
+
+        <div class="form-group" id="custom-k-group" style="display: none;">
+            <label for="custom-k">Nhập giá trị K:</label>
+            <input type="number" id="custom-k" step="0.1" min="0.1" placeholder="Ví dụ: 3.0">
+        </div>
+
+        <button onclick="calculateDamage()">TÍNH SÁT THƯƠNG</button>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        document.getElementById('k-factor').addEventListener('change', function() {
+            const customKGroup = document.getElementById('custom-k-group');
+            if (this.value === 'custom') {
+                customKGroup.style.display = 'block';
+            } else {
+                customKGroup.style.display = 'none';
+            }
+        });
+
+        function calculateDamage() {
+            const damage = parseFloat(document.getElementById('damage').value);
+            const hat = parseFloat(document.getElementById('hat').value) || 0;
+            const armor = parseFloat(document.getElementById('armor').value) || 0;
+            const pants = parseFloat(document.getElementById('pants').value) || 0;
+            const boots = parseFloat(document.getElementById('boots').value) || 0;
+            const setBonus = parseFloat(document.getElementById('set-bonus').value) || 0;
+            const extraDefense = parseFloat(document.getElementById('defense').value) || 0;
+
+            const equipmentDef = hat + armor + pants + boots;
+            const defense = equipmentDef + setBonus + extraDefense;
+
+            let k = parseFloat(document.getElementById('k-factor').value);
+            if (document.getElementById('k-factor').value === 'custom') {
+                k = parseFloat(document.getElementById('custom-k').value);
+                if (isNaN(k) || k <= 0) {
+                    alert("Vui lòng nhập hệ số K hợp lệ!");
+                    return;
+                }
+            }
+
+            if (isNaN(damage) || isNaN(defense) || damage <= 0 || defense < 0) {
+                alert("Vui lòng nhập giá trị hợp lệ!");
+                return;
+            }
+
+            const damageReduction = defense / (k * damage + defense);
+            const finalDamage = damage * (1 - damageReduction);
+
+            const resultElement = document.getElementById('result');
+            resultElement.innerHTML = `
+                <strong>⚔️ Sát thương gốc:</strong> ${damage.toFixed(2)}<br>
+                <strong> --------------------------------------<br>
+                <strong>🛡️ Phòng thủ từ trang bị:</strong> ${equipmentDef.toFixed(2)}<br>
+                <strong>🌟 Bonus full set:</strong> ${setBonus.toFixed(2)}<br>
+                <strong>➕ Phòng thủ bổ sung:</strong> ${extraDefense.toFixed(2)}<br>
+                <strong>🛡️ Tổng phòng thủ:</strong> ${defense.toFixed(2)}<br>
+                <strong> --------------------------------------<br>
+                <strong>📉 Giảm sát thương:</strong> ${(damageReduction * 100).toFixed(2)}%<br>
+                <strong>💥 Sát thương thực nhận:</strong> <span class="highlight">${finalDamage.toFixed(1)}</span>
+            `;
+            resultElement.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
