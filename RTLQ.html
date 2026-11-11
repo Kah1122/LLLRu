@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Random tướng Liên Quân</title>
+<style>
+:root{--bg:#f6f3ec;--card:#fff;--text:#1d1b16;--muted:#6b665a;--accent:#c8501e;--accent-text:#fff;--border:#e2dccd;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15130f;--card:#201d17;--text:#f3efe6;--muted:#a49d8d;--accent:#ee7a45;--accent-text:#1a1208;--border:#37322826}}
+:root[data-theme="dark"]{--bg:#15130f;--card:#201d17;--text:#f3efe6;--muted:#a49d8d;--accent:#ee7a45;--accent-text:#1a1208;--border:#373228}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh;display:flex;justify-content:center}
+main{width:100%;max-width:520px;padding:28px 18px 40px;text-align:center}
+h1{font-size:1.5rem;margin:0 0 4px}
+p.sub{color:var(--muted);margin:0 0 22px;font-size:.95rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:36px 16px;margin-bottom:18px}
+.name{font-size:clamp(2rem,10vw,3rem);font-weight:800;min-height:1.3em;word-break:break-word}
+.name.spin{color:var(--muted)}
+.hint{color:var(--muted);font-size:.9rem;margin-top:6px}
+button{font:inherit;cursor:pointer}
+.go{width:100%;padding:16px;border:0;border-radius:14px;background:var(--accent);color:var(--accent-text);font-size:1.15rem;font-weight:700}
+.go:disabled{opacity:.6}
+label{display:flex;gap:8px;align-items:center;justify-content:center;margin:16px 0;color:var(--muted);font-size:.92rem}
+.hist{text-align:left;margin-top:8px}
+.hist h2{font-size:1rem;margin:0 0 8px;display:flex;justify-content:space-between;align-items:center}
+.hist button{background:none;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:4px 10px;font-size:.8rem}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:var(--card);border:1px solid var(--border);border-radius:999px;padding:5px 12px;font-size:.88rem}
+</style>
+</head>
+<body>
+<main>
+<h1>🎲 Random tướng Liên Quân</h1>
+<p class="sub">Không biết chơi tướng nào? Để may mắn quyết định!</p>
+<div class="card">
+<div class="name" id="name">?</div>
+<div class="hint" id="hint">Bấm nút bên dưới để quay</div>
+</div>
+<button class="go" id="go">Quay tướng</button>
+<label><input type="checkbox" id="norepeat" checked> Không lặp lại tướng đã ra</label>
+<div class="hist">
+<h2><span>Lịch sử</span><button id="reset">Xóa</button></h2>
+<div class="chips" id="chips"></div>
+</div>
+</main>
+<script>
+const HEROES="Evita,Tamyn,Flowborn,Dyadia,Edras,Goverra,Heino,Billow,Bolt Baron,Biron,Dolia,Charlotte,Tachi,Dirak,Qi,Erin,Ming,Bijan,Bonnie,Teeri,Yue,Yan,Aya,Aoi,Iggy,Bright,Lorion,Dextra,Sinestrea,Thorne,Allain,Zata,Rouie,Laville,Paine,Ata,Keera,Ishar,Eland’orr,Krizzix,Volkath,Celica,Zip,Enzo,Yena,Errol,Capheny,Hayate,D’Arcy,Veres,Florentino,Sephera,Quillen,Wiro,Richter,Elsu,Y’bneth,Amily,Annette,Baldum,Roxie,Marja,Rourke,Arum,Wisp,The Flash,Max,Liliana,Tulen,Omen,Lindis,TeeMee,Moren,Kil’Groth,Xeniel,Wonder Woman,Superman,Tel’Annas,Astrid,Ryoma,Stuart,Arduin,Zill,Murad,Ignis,Zuka,Airi,Kaine,Lauriel,Raz,Skud,Preyta,Ilumia,Slimz,Arthur,Kriknak,Ngộ Không,Maloch,Helen,Jinna,Cresht,Natalya,Lumburr,Fennik,Aleister,Grakk,Nakroth,Taara,Toro,Yorn,Gildur,Alice,Azzen’Ka,Ormarr,Butterfly,Violet,Chaugnar,Điêu Thuyền,Zephys,Kahlii,Omega,Triệu Vân,Mganga,Krixi,Mina,Lữ Bố,Veera,Thane,Valhein".split(",");
+const $=id=>document.getElementById(id);
+let history=[],busy=false;
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+function render(){
+  $("chips").innerHTML=history.map(h=>'<span class="chip">'+h+'</span>').join("")||'<span class="hint">Chưa có tướng nào</span>';
+}
+$("go").onclick=()=>{
+  if(busy)return;
+  let pool=HEROES;
+  if($("norepeat").checked){
+    pool=HEROES.filter(h=>!history.includes(h));
+    if(!pool.length){history=[];pool=HEROES;}
+  }
+  const pick=rnd(pool);
+  busy=true;$("go").disabled=true;$("name").classList.add("spin");$("hint").textContent="Đang quay...";
+  let i=0,total=22;
+  const tick=()=>{
+    if(i<total){
+      $("name").textContent=rnd(HEROES);i++;
+      setTimeout(tick,40+i*i*0.6);
+    }else{
+      $("name").textContent=pick;$("name").classList.remove("spin");
+      $("hint").textContent="Hôm nay bạn chơi "+pick+"!";
+      history.unshift(pick);render();
+      busy=false;$("go").disabled=false;$("go").textContent="Quay lại";
+    }
+  };
+  tick();
+};
+$("reset").onclick=()=>{history=[];render();};
+render();
+</script>
+</body>
+</html>
